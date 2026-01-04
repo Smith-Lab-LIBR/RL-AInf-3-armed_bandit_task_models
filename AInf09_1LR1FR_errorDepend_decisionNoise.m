@@ -61,11 +61,12 @@ Q_error = zeros(1, T);
 v_0 = [0.5 0.5 0.5;
        0.5 0.5 0.5];
 
-% B_pi: A matrix representing deterministic transitions to each bandit state, depending on choice.
-% Each column represents a choice. Each row represents a bandit state.
-B_pi = [1 0 0;
-        0 1 0;
-        0 0 1];
+% s_a: A matrix representing choice state occupied depending on actions. 
+% Ex: The 1st column [1; 0; 0] corresponds to occupying choice state 1 when action 1 is chosen.
+% Each column represents an action. Each row represents a choice state.
+s_a = [1 0 0;
+       0 1 0;
+       0 0 1];
 
 % R vector: encodes reward value for [win loss] observations. Often referred to as a "preference distribution"
 % in Active Inference.
@@ -97,9 +98,9 @@ for t = 1:T
     % option (pol).
     for pol = 1:3 
         % expected information gain
-        expected_info_value(pol,t) = dot(V{t}*B_pi(:,pol),info_gain*B_pi(:,pol));
+        expected_info_value(pol,t) = dot(V{t}*s_a(:,pol),info_gain*s_a(:,pol));
         % expected reward
-        expected_reward_value(pol,t) = dot(V{t}*B_pi(:,pol),log(R));
+        expected_reward_value(pol,t) = dot(V{t}*s_a(:,pol),log(R));
         % overall expected value
         expected_value_w_info(pol,t) = expected_reward_value(pol,t)+ params.gamma*expected_info_value(pol,t);
     end
@@ -142,7 +143,7 @@ for t = 1:T
     
     % Learning (update concentration parameter counts in Dirichlet distribution
     % v).
-    v{t+1} = v{t+1} + params.alpha*(B_pi(:,choice_at_t)*outcome_vector(:,t)')';
+    v{t+1} = v{t+1} + params.alpha*(s_a(:,choice_at_t)*outcome_vector(:,t)')';
  
 end
 
